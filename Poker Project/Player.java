@@ -38,9 +38,18 @@ public class Player
         this.hand[1] = card;
     }
     
-    public void bet(int amount)
+    public boolean bet(int amount)
     {
+        if(amount > balance)
+        {
+        System.out.println("You do not have enough money for this action!");
+        return false;
+        }
+        else
+        {
         balance -= amount;
+        return false;
+        }
     }
     
     public void fold()
