@@ -38,8 +38,10 @@ public class Player
         this.hand[1] = card;
     }
     
+    //combines call and raise
     public boolean bet(int amount)
     {
+        //make sure player has enough money to bet
         if(amount > balance)
         {
         System.out.println("You do not have enough money for this action!");
@@ -51,7 +53,7 @@ public class Player
         return false;
         }
     }
-    
+        
     public void fold()
     {
         fold = true;
@@ -60,5 +62,10 @@ public class Player
     public Card[] getHand()
     {
         return hand;
+    }
+    
+    public String toString()
+    {
+        return "Name: " + name + "\n" + "Balance: " + balance + "\n" + "Hand: " + "(" + hand[0] + hand[1] + ") \n";
     }
 }

@@ -26,17 +26,15 @@ public class Card
         return value;
     }
     
+    //compare two cards by their values, since suites have the same value
     public int compare(Card card)
     {
       return this.value - card.getVal();  
     }
     
-    public boolean equals(Card card)
+    public String toString()
     {
-        if(this.suit.equals(card.getSuit()) && this.value == card.getVal())
-        return true;
-        else 
-        return false;
+        return("[" + suit + "  " + value + "]");
     }
-   
+      
 }

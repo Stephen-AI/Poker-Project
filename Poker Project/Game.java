@@ -10,7 +10,7 @@ public class Game
    String[] suits = {"H","S","D","C"};
    private LinkedList<Player> table;
    private LinkedList<Card> deck;
-   private static LinkedHashSet<Card> community;
+   private TreeSet<Card> community;
    private int pot;
    private int minBlind;
    private int maxBlind;
@@ -18,12 +18,14 @@ public class Game
    public Game(LinkedList<Player> players, boolean blinds)
    {
        table = players;
+       //create 52 cards
        for(String s : suits)
        {
            for(int i = 2; i <= 14; i++)
            deck.push(new Card(s, i));
        }
        Collections.shuffle(deck);
+       //option for blinds
        if(blinds)
        {
            System.out.print("What is the Small Blind: ");
@@ -32,6 +34,7 @@ public class Game
        }             
    }
    
+   //simulates dealing of cards. Gives each player 2 cards dealt one by one
    public void deal()
    {
        for(int i = 0; i < table.size() * 2; i++)
@@ -41,19 +44,26 @@ public class Game
        table.addLast(temp);
        }
    } 
-   
+  
+  //adds num cards to the community set of cards, where num is the number of cards 
   public void addCommunity(int num)
   {
       for(int i = num; i <= 0; i--)
+      {
+      deck.addLast(deck.pop());
       community.add(deck.pop());
+      }
   }
   
-  public static boolean isFlush(LinkedHashSet<Card> share, Card[] pHand)
+  //checks if a set of cards are a flush
+  public static boolean isFlush(TreeSet<Card> share, Card[] pHand)
   {
-      share.add(pHand[0]);
-      share.add(pHand[1]);     
-      String suit = share.iterator().next().getSuit();
-      for(Card c : share)
+      TreeSet<Card> shared = new TreeSet(share);
+      shared.add(pHand[0]);
+      shared.add(pHand[1]); 
+      String suit = shared.iterator().next().getSuit();
+      //all cards must be equal to the suit
+      for(Card c : shared)
       {
           if(!suit.equals(c.getSuit()))
           return false;
@@ -61,20 +71,24 @@ public class Game
       return true;
   }
   
-  public static boolean sequence(LinkedHashSet<Card> share, Card[] pHand)
+  //checks to see if a set of cards are in sequence
+  public static boolean sequence(TreeSet<Card> share, Card[] pHand)
   {
-      share.add(pHand[0]);
-      share.add(pHand[1]); 
-      int expected = 5 * (share.iterator().next().getVal() + 2);
+      TreeSet<Card> shared = new TreeSet(share);
+      shared.add(pHand[0]);
+      shared.add(pHand[1]); 
+      //using sum of arithmetic series
+      int expected = 5 * (shared.iterator().next().getVal() + 2);
       int sum = 0;
-      for(Card c : share)
+      for(Card c : shared)
       sum = sum + c.getVal();
       if(sum == expected)
       return true;
       return false;
   }
   
-  public static int comboRank(Player p)
+  //determines the combination a player has and returns the rank using the number of distinct numbers the player's hand and community set have
+  public int comboRank(Player p)
   {
      HashMap<Integer,Integer> hm = new HashMap();
      hm.put(p.getHand()[0].getVal(), 1);
@@ -118,7 +132,7 @@ public class Game
      
      else
      {
-         if(!sequence(community, p.getHand()))
+         if(!sequence(community, p.getHand()) && !hm.containsKey(14))
          return 6;
          else if(sequence(community, p.getHand()))
          return 9;
