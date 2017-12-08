@@ -1,4 +1,4 @@
-
+import javax.swing.*;
 /**
  * Write a description of class Player here.
  * 
@@ -11,6 +11,8 @@ public class Player
     private int balance;
     private Card[] hand;
     boolean fold;
+    boolean dealer;
+    int lastbet;
     
     public Player(String name, int bal)
     {
@@ -18,8 +20,9 @@ public class Player
         this.balance = bal;
         hand = new Card[2];
         fold = false;
+        dealer = false;
     }
-    
+           
     public String getName()
     {
         return name;
@@ -44,19 +47,35 @@ public class Player
         //make sure player has enough money to bet
         if(amount > balance)
         {
-        System.out.println("You do not have enough money for this action!");
+        JOptionPane.showMessageDialog(null, "You do not have enough money for this action!");
         return false;
         }
         else
         {
         balance -= amount;
-        return false;
+        lastbet = amount;
+        return true;
         }
     }
         
     public void fold()
     {
         fold = true;
+    }
+    
+    public boolean folded()
+    {
+        return fold;
+    }
+    
+    public void setDealer()
+    {
+        dealer = true;
+    }
+    
+    public boolean isDealer()
+    {
+        return dealer;
     }
     
     public Card[] getHand()

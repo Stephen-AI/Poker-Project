@@ -1,4 +1,5 @@
 import java.util.*;
+import javax.swing.*;
 /**
  * Write a description of class Game here.
  * 
@@ -8,13 +9,13 @@ import java.util.*;
 public class Game
 {
    String[] suits = {"H","S","D","C"};
-   private LinkedList<Player> table;
-   private LinkedList<Card> deck;
-   private TreeSet<Card> community;
+   private LinkedList<Player> table = new LinkedList();
+   private LinkedList<Card> deck = new LinkedList();
+   private TreeSet<Card> community = new TreeSet();
    private int pot;
-   private int minBlind;
-   private int maxBlind;
-   Scanner input = new Scanner(System.in);
+   private int minBlind = -1;
+   private int maxBlind = -1;
+   boolean blinds;
    public Game(LinkedList<Player> players, boolean blinds)
    {
        table = players;
@@ -25,15 +26,56 @@ public class Game
            deck.push(new Card(s, i));
        }
        Collections.shuffle(deck);
+       
+       //set dealer
+       Collections.shuffle(table);   
+       Player temp = table.pop();
+       temp.setDealer();
+       table.addLast(temp);
+       
        //option for blinds
        if(blinds)
        {
-           System.out.print("What is the Small Blind: ");
-           minBlind = input.nextInt();
+          this.blinds = true;
+          while(minBlind < 0)
+          {
+           minBlind = Integer.parseInt(JOptionPane.showInputDialog(null,"What is the minimun blind: ")); 
            maxBlind = 2 * minBlind;
-       }             
+          }  
+          
+          temp = table.pop();
+          temp.bet(minBlind);
+          table.addLast(temp);
+        
+          temp = table.pop();
+          temp.bet(maxBlind);
+          table.addLast(temp);
+          setMinBlind(maxBlind);
+      }     
+      else
+      this.blinds = false;
+      }
+   
+   public int getMinBlind()
+   {
+       return minBlind;
    }
    
+   public int getMaxBlind()
+   {
+       return maxBlind;
+   }
+   
+   public void setMinBlind(int amount)
+   {
+       minBlind = amount;
+       maxBlind = amount * 2;
+   }
+   
+   public LinkedList<Player> table()
+   {
+       return table;
+   }
    //simulates dealing of cards. Gives each player 2 cards dealt one by one
    public void deal()
    {
