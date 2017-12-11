@@ -5,7 +5,7 @@
  * @author (your name) 
  * @version (a version number or a date)
  */
-public class Card
+public class Card implements Comparable
 {
     private String suit;
     private int value;
@@ -27,9 +27,9 @@ public class Card
     }
     
     //compare two cards by their values, since suites have the same value
-    public int compare(Card card)
+    public int compareTo(Object card)
     {
-      return this.value - card.getVal();  
+      return this.value - ((Card)card).getVal();  
     }
     
     public String toString()

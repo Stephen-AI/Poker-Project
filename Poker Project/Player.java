@@ -12,8 +12,7 @@ public class Player
     private Card[] hand;
     boolean fold;
     boolean dealer;
-    int lastbet;
-    
+        
     public Player(String name, int bal)
     {
         this.name = name;
@@ -35,7 +34,7 @@ public class Player
     
     public void setHand(Card card)
     {
-        if(hand.length == 0)
+        if(hand[0] == null)
         this.hand[0] = card;
         else
         this.hand[1] = card;
@@ -53,14 +52,13 @@ public class Player
         else
         {
         balance -= amount;
-        lastbet = amount;
         return true;
         }
     }
         
-    public void fold()
+    public void fold(boolean has)
     {
-        fold = true;
+        fold = has;
     }
     
     public boolean folded()
@@ -68,9 +66,9 @@ public class Player
         return fold;
     }
     
-    public void setDealer()
+    public void setDealer(boolean is)
     {
-        dealer = true;
+        dealer = is;
     }
     
     public boolean isDealer()

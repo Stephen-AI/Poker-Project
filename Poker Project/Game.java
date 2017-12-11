@@ -15,6 +15,7 @@ public class Game
    private int pot;
    private int minBlind = -1;
    private int maxBlind = -1;
+   Player highbet = null;
    boolean blinds;
    public Game(LinkedList<Player> players, boolean blinds)
    {
@@ -22,15 +23,15 @@ public class Game
        //create 52 cards
        for(String s : suits)
        {
-           for(int i = 2; i <= 14; i++)
+           for(int i = 2; i <= 14; ++i)
            deck.push(new Card(s, i));
        }
        Collections.shuffle(deck);
        
        //set dealer
-       Collections.shuffle(table);   
+       Collections.shuffle(table);
        Player temp = table.pop();
-       temp.setDealer();
+       temp.setDealer(true);
        table.addLast(temp);
        
        //option for blinds
@@ -39,23 +40,50 @@ public class Game
           this.blinds = true;
           while(minBlind < 0)
           {
-           minBlind = Integer.parseInt(JOptionPane.showInputDialog(null,"What is the minimun blind: ")); 
+           minBlind = Integer.parseInt(JOptionPane.showInputDialog(null,"What is the minimum blind: ")); 
            maxBlind = 2 * minBlind;
           }  
           
           temp = table.pop();
           temp.bet(minBlind);
+          addPot(minBlind);
           table.addLast(temp);
         
           temp = table.pop();
           temp.bet(maxBlind);
+          addPot(maxBlind);
           table.addLast(temp);
           setMinBlind(maxBlind);
       }     
       else
-      this.blinds = false;
+      {
+          this.blinds = false;
+          while(minBlind < 0)
+          {
+          minBlind = Integer.parseInt(JOptionPane.showInputDialog(null,"What is the ante amount: ")); 
+          maxBlind = 2 * minBlind;
+          }
       }
+    }
+    
+    //the player who made the highest bet
+   public void setHighBet(Player player)
+   {
+       highbet = player;
+   }
    
+   public void resetDealer()
+   {
+       for(Player p : table)
+       p.setDealer(false);
+   }
+   
+   public void unfold()
+   {
+       for(Player p : table)
+       p.fold(false);
+   }
+     
    public int getMinBlind()
    {
        return minBlind;
@@ -72,6 +100,10 @@ public class Game
        maxBlind = amount * 2;
    }
    
+   public void addPot(int amount)
+   {
+       pot = pot + amount;
+   }
    public LinkedList<Player> table()
    {
        return table;
@@ -79,6 +111,7 @@ public class Game
    //simulates dealing of cards. Gives each player 2 cards dealt one by one
    public void deal()
    {
+       Collections.shuffle(deck); 
        for(int i = 0; i < table.size() * 2; i++)
        {
        Player temp = table.pop();
@@ -86,15 +119,42 @@ public class Game
        table.addLast(temp);
        }
    } 
+   
+  public TreeSet<Card> getCommunity()
+  {
+      return community;
+  }
   
   //adds num cards to the community set of cards, where num is the number of cards 
   public void addCommunity(int num)
   {
-      for(int i = num; i <= 0; i--)
+      Collections.shuffle(deck); 
+      for(int i = num; i > 0; i--)
       {
       deck.addLast(deck.pop());
       community.add(deck.pop());
       }
+  }
+  
+  public void winner()
+  {
+     Player winner = table.iterator().next();
+     System.out.println(community + "\n");
+     
+     for(Player p : table)
+     {
+         System.out.println(p);
+         if(comboRank(winner) < comboRank(p))
+         winner = p;
+     }
+     
+     JOptionPane.showMessageDialog(null, winner.getName() + " wins this round! with " + comboRank(winner));
+  }
+   
+  
+  public String toString()
+  {
+      return "pot: " + pot + "\n community cards: " + community;
   }
   
   //checks if a set of cards are a flush
@@ -104,13 +164,16 @@ public class Game
       shared.add(pHand[0]);
       shared.add(pHand[1]); 
       String suit = shared.iterator().next().getSuit();
+      int count = 0;
       //all cards must be equal to the suit
       for(Card c : shared)
       {
-          if(!suit.equals(c.getSuit()))
-          return false;
+          if(suit.equals(c.getSuit()))
+          count++;
       }
+      if(count >= 5)
       return true;
+      return false;
   }
   
   //checks to see if a set of cards are in sequence
@@ -119,16 +182,23 @@ public class Game
       TreeSet<Card> shared = new TreeSet(share);
       shared.add(pHand[0]);
       shared.add(pHand[1]); 
-      //using sum of arithmetic series
-      int expected = 5 * (shared.iterator().next().getVal() + 2);
-      int sum = 0;
+      int count = 0;
+      int prev = shared.iterator().next().getVal();
       for(Card c : shared)
-      sum = sum + c.getVal();
-      if(sum == expected)
+      {
+          if(prev == c.getVal() + 1)
+          count++;
+          else
+          count = 0;
+          prev = c.getVal();
+      }
+      
+      if(count >= 5)
       return true;
       return false;
   }
   
+   
   //determines the combination a player has and returns the rank using the number of distinct numbers the player's hand and community set have
   public int comboRank(Player p)
   {
@@ -150,19 +220,19 @@ public class Game
      {
          switch(hm.size())
          {
-             case 5:
+             case 7:
              if(sequence(community, p.getHand()))
              return 5;
              else
              return 1;
-             case 4:
+             case 6:
              return 2;
-             case 3:
+             case 5:
              if(Collections.max(hm.values()) == 2)
              return 3;
              else
              return 4;
-             case 2:
+             case 4:
              if(Collections.max((hm.values())) == 3)
              return 7;
              else
